@@ -1,0 +1,47 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# build output
+.svelte-kit/
+build/
+dist/
+.vercel/
+.cloudflare/
+.wrangler/
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+wrangler.toml.local
+
+# scraper output: 224MB of crawled payloads, regenerate with `supply crawl`
+server/data/
+
+# compiled binaries
+*.exe
+*.dll
+*.so
+*.dylib
+supply
+
+# local tooling
+.scratchpad/
+coverage/
+*.log
+.turbo/
+.cache/
+
+# editor and OS
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

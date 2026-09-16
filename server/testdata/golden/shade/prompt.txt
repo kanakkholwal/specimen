@@ -1,0 +1,3 @@
+Prompt snapshot not stored for this extraction.
+
+Re-extract this style to capture the exact LLM input for future review.

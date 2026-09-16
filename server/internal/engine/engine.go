@@ -14,7 +14,7 @@ import (
 
 	"golang.org/x/sync/errgroup"
 
-	"github.com/kanak/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
 )
 
 // Store is the persistence and scheduling surface the engine needs.
@@ -76,7 +76,7 @@ func (c *Config) defaults() {
 }
 
 // DefaultUserAgent identifies the crawler and does not impersonate a browser.
-const DefaultUserAgent = "design-supply/0.1 (personal design archive; +https://github.com/kanak/design-supply)"
+const DefaultUserAgent = "design-supply/0.1 (personal design archive; +https://github.com/kanakkholwal/design-supply)"
 
 // Stats is the per-run tally reported at the end.
 type Stats struct {

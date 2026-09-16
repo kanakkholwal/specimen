@@ -10,5 +10,11 @@
 		"sourceMap": true,
 		"strict": true,
 		"moduleResolution": "bundler"
-	}
+	},
+	"exclude": [
+		".svelte-kit/output",
+		"node_modules",
+		"dist",
+		"server"
+	]
 }

@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kanak/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
 )
 
 // memStore is an in-memory engine.Store for exercising the pipeline without SQLite.

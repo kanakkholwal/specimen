@@ -1,4 +1,4 @@
-module github.com/kanak/design-supply
+module github.com/kanakkholwal/design-supply
 
 go 1.26.0
 

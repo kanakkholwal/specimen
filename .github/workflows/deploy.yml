@@ -1,0 +1,57 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# The scraper never runs here. Heavy data is produced locally and pushed to D1 and R2
+# out of band, so CI only builds and deploys the worker.
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install
+        run: bun install --frozen-lockfile
+
+      - name: Gates
+        run: |
+          bun run gate:comments
+          bun run gate:dashes
+          bun run lint
+          bun run check
+
+      - name: Build
+        run: bun run build
+
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  scraper:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: server/go.mod
+          cache-dependency-path: server/go.sum
+
+      - name: Test and vet
+        working-directory: server
+        run: |
+          go vet ./...
+          go test ./...
+
+      - name: Comment gate
+        working-directory: server
+        run: node scripts/check-comments.mjs --all

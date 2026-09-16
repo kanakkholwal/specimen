@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kanak/design-supply/internal/adapter"
-	"github.com/kanak/design-supply/internal/normalize"
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/normalize"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 // Write persists one parsed page in a single transaction. Records are adapter-owned, so

@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kanak/design-supply/internal/flight"
-	"github.com/kanak/design-supply/internal/normalize"
+	"github.com/kanakkholwal/design-supply/internal/flight"
+	"github.com/kanakkholwal/design-supply/internal/normalize"
 )
 
 // PageData is everything one style page yields.

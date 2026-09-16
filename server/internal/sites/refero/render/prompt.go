@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"strings"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 const promptMissing = "Prompt snapshot not stored for this extraction.\n\n" +

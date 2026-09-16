@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 func loadResult(t *testing.T) refero.Result {

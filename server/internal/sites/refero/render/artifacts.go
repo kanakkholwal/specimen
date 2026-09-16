@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 // Version tags generated artifacts. Bump it whenever a generator's output changes so

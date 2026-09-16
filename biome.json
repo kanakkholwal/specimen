@@ -1,7 +1,14 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["src/**/*.ts", "src/**/*.js", "scripts/**/*.mjs", "*.ts", "*.js"]
+    "includes": [
+      "src/**/*.ts",
+      "src/**/*.js",
+      "scripts/**/*.mjs",
+      "*.ts",
+      "*.js",
+      "!src/worker-configuration.d.ts"
+    ]
   },
   "formatter": {
     "enabled": true,
@@ -16,6 +23,8 @@
   },
   "linter": {
     "enabled": true,
-    "rules": { "recommended": true }
+    "rules": {
+      "recommended": true
+    }
   }
 }

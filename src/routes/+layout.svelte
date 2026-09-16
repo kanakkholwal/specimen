@@ -1,6 +1,7 @@
 <script lang="ts">
 	import '@fontsource-variable/google-sans';
 	import '@fontsource-variable/inter';
+	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource-variable/source-code-pro';
 	import '../app.css';
 	import { ModeWatcher } from 'mode-watcher';

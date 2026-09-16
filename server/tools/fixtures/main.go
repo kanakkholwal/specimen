@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/kanak/design-supply/internal/flight"
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/flight"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 func main() {

@@ -3,7 +3,7 @@ package render
 import (
 	"sort"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 // TokensJSON renders the Design Tokens export in DTCG shape.

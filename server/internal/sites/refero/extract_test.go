@@ -8,7 +8,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kanak/design-supply/internal/flight"
+	"github.com/kanakkholwal/design-supply/internal/flight"
 )
 
 const shadeID = "e549766e-b8b1-48a2-bd72-8cc04e9e4e9d"

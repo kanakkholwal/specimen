@@ -1,5 +1,5 @@
 {
-  "name": "design-supply",
+  "name": "specimen",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -14,11 +14,13 @@
     "format": "bunx --bun biome format --write ./src",
     "gate:comments": "bun scripts/check-comments.mjs --all",
     "gate:dashes": "bun scripts/check-dashes.mjs",
-    "gate": "bun run gate:comments && bun run gate:dashes && bun run lint && bun run check"
+    "gate": "bun run gate:comments && bun run gate:dashes && bun run lint && bun run check",
+    "types": "bun scripts/gen-worker-types.mjs"
   },
   "dependencies": {
     "@fontsource-variable/google-sans": "^5.2.1",
     "@fontsource-variable/inter": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource-variable/source-code-pro": "^5.2.7",
     "@tabler/icons-svelte": "^3.46.0",
     "@tailwindcss/vite": "^4.3.3",
@@ -34,6 +36,7 @@
     "@typescript/native": "npm:typescript@^7.0.2",
     "bits-ui": "^2.19.2",
     "clsx": "^2.1.1",
+    "shiki": "^4.4.3",
     "svelte": "^5.57.0",
     "svelte-check": "^4.7.6",
     "svelte-sonner": "^1.2.1",

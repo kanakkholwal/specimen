@@ -1,5 +1,6 @@
 <script lang="ts">
 	// SVG text scales with the viewBox, so the wordmark stays off the type scale entirely.
+	// Letterforms are left at natural width; stretching short words distorts them badly.
 	let { text }: { text: string } = $props();
 
 	let x = $state(50);
@@ -14,7 +15,10 @@
 		on = true;
 	}
 
-	const mask = $derived(`radial-gradient(circle 10rem at ${x}% ${y}%, black, transparent)`);
+	const mask = $derived(`radial-gradient(circle 8rem at ${x}% ${y}%, black, transparent)`);
+	const spotlight = $derived(
+		`opacity:${on ? 1 : 0};mask-image:${mask};-webkit-mask-image:${mask}`
+	);
 </script>
 
 <div
@@ -23,34 +27,27 @@
 	onpointermove={track}
 	onpointerleave={() => (on = false)}
 >
-	<svg viewBox="0 0 1000 220" class="block h-auto w-full fill-muted">
+	<svg viewBox="0 0 1000 190" class="block h-auto w-full fill-muted">
 		<text
 			x="500"
-			y="205"
+			y="150"
 			text-anchor="middle"
-			textLength="990"
-			lengthAdjust="spacing"
-			font-size="270"
+			font-size="200"
 			font-weight="500"
+			letter-spacing="-8"
 			style="font-family: var(--font-heading)">{text}</text
 		>
 	</svg>
 
-	<div
-		class="absolute inset-0 transition-opacity duration-300"
-		style:opacity={on ? 1 : 0}
-		style:mask-image={mask}
-		style:-webkit-mask-image={mask}
-	>
-		<svg viewBox="0 0 1000 220" class="block h-auto w-full fill-primary">
+	<div class="absolute inset-0 transition-opacity duration-300" style={spotlight}>
+		<svg viewBox="0 0 1000 190" class="block h-auto w-full fill-primary">
 			<text
 				x="500"
-				y="205"
+				y="150"
 				text-anchor="middle"
-				textLength="990"
-				lengthAdjust="spacing"
-				font-size="270"
+				font-size="200"
 				font-weight="500"
+				letter-spacing="-8"
 				style="font-family: var(--font-heading)">{text}</text
 			>
 		</svg>

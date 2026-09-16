@@ -4,7 +4,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 type lines []string

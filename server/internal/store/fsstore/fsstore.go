@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/kanak/design-supply/internal/normalize"
+	"github.com/kanakkholwal/design-supply/internal/normalize"
 )
 
 type FS struct{ root string }

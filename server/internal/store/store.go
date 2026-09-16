@@ -11,12 +11,12 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/kanak/design-supply/internal/adapter"
-	"github.com/kanak/design-supply/internal/engine"
-	"github.com/kanak/design-supply/internal/sites/refero"
-	"github.com/kanak/design-supply/internal/sites/refero/render"
-	"github.com/kanak/design-supply/internal/store/fsstore"
-	"github.com/kanak/design-supply/internal/store/sqlite"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/engine"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero/render"
+	"github.com/kanakkholwal/design-supply/internal/store/fsstore"
+	"github.com/kanakkholwal/design-supply/internal/store/sqlite"
 )
 
 type Store struct {

@@ -10,8 +10,8 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kanak/design-supply/internal/adapter"
-	"github.com/kanak/design-supply/internal/flight"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/flight"
 )
 
 const (

@@ -3,7 +3,7 @@ package render
 import (
 	"strings"
 
-	"github.com/kanak/design-supply/internal/sites/refero"
+	"github.com/kanakkholwal/design-supply/internal/sites/refero"
 )
 
 // DesignMd renders the DESIGN.md export in either variant.

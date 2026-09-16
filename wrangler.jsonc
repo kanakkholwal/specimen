@@ -1,6 +1,6 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "design-supply",
+	"name": "specimen",
 	"main": ".svelte-kit/cloudflare/_worker.js",
 	"compatibility_date": "2026-09-16",
 	"compatibility_flags": ["nodejs_compat"],
@@ -11,22 +11,22 @@
 	"observability": {
 		"enabled": true
 	},
-		"routes": [
+	"routes": [
+		{ "pattern": "specimen.nexonauts.com", "custom_domain": true },
 		{ "pattern": "design.nexonauts.com", "custom_domain": true },
-		{ "pattern": "designmd.nexonauts.com", "custom_domain": true },
-		{ "pattern": "design-md.nexonauts.com", "custom_domain": true },
+		{ "pattern": "designmd.nexonauts.com", "custom_domain": true }
 	],
 	"d1_databases": [
 		{
 			"binding": "DB",
-			"database_name": "design-supply",
+			"database_name": "specimen",
 			"database_id": "REPLACE_WITH_D1_ID"
 		}
 	],
 	"r2_buckets": [
 		{
 			"binding": "ASSETS_BUCKET",
-			"bucket_name": "design-supply-assets"
+			"bucket_name": "specimen-assets"
 		}
 	]
 }

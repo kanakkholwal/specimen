@@ -13,8 +13,8 @@ import (
 
 	_ "modernc.org/sqlite"
 
-	"github.com/kanak/design-supply/internal/adapter"
-	"github.com/kanak/design-supply/internal/engine"
+	"github.com/kanakkholwal/design-supply/internal/adapter"
+	"github.com/kanakkholwal/design-supply/internal/engine"
 )
 
 //go:embed schema.sql

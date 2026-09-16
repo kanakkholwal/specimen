@@ -327,3 +327,33 @@ func (d *DB) dropCaches() {
 	clear(d.fonts)
 	clear(d.values)
 }
+
+// Requeue returns specific targets to the pending pool so --refresh genuinely refetches
+// them, rather than only skipping the conditional GET.
+func (d *DB) Requeue(ctx context.Context, urls []string) (int64, error) {
+	if len(urls) == 0 {
+		return 0, nil
+	}
+	tx, err := d.db.BeginTx(ctx, nil)
+	if err != nil {
+		return 0, err
+	}
+	defer tx.Rollback()
+	stmt, err := tx.PrepareContext(ctx,
+		`UPDATE frontier SET state='pending', etag=NULL, last_modified=NULL WHERE url=?`)
+	if err != nil {
+		return 0, err
+	}
+	defer stmt.Close()
+	var n int64
+	for _, u := range urls {
+		res, err := stmt.ExecContext(ctx, u)
+		if err != nil {
+			return n, err
+		}
+		if c, _ := res.RowsAffected(); c > 0 {
+			n += c
+		}
+	}
+	return n, tx.Commit()
+}

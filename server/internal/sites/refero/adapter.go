@@ -91,8 +91,21 @@ type urlset struct {
 func (a *Adapter) Seeds(ctx context.Context, f adapter.Fetcher) ([]adapter.Target, error) {
 	if len(a.opts.OnlyIDs) > 0 {
 		out := make([]adapter.Target, 0, len(a.opts.OnlyIDs))
-		for _, id := range a.opts.OnlyIDs {
-			out = append(out, adapter.Target{URL: StyleURL(id), Kind: KindStyle})
+		for _, want := range a.opts.OnlyIDs {
+			// Accept a bare style id or any page URL, so a single page can be re-crawled.
+			if !strings.HasPrefix(want, "http") {
+				out = append(out, adapter.Target{URL: StyleURL(want), Kind: KindStyle})
+				continue
+			}
+			u, err := url.Parse(want)
+			if err != nil {
+				continue
+			}
+			kind, ok := a.Classify(u)
+			if !ok {
+				continue
+			}
+			out = append(out, adapter.Target{URL: want, Kind: kind})
 		}
 		return out, nil
 	}
@@ -241,43 +254,60 @@ func collectionKind(rawURL string) string {
 	return "root"
 }
 
-// pageTitle reads the rendered <title> element out of the flight metadata rows.
+// pageTitle reads the page's own <title>. A payload also carries Next.js not-found
+// boundary metadata, so placeholders are skipped rather than taken on document order.
 func pageTitle(doc *flight.Doc) string {
+	const suffix = " | Refero Styles"
+	var fallback string
 	for _, id := range doc.Order {
 		v, ok := doc.JSON[id]
 		if !ok {
 			continue
 		}
-		if title := findTitle(v); title != "" {
-			return strings.TrimSuffix(title, " | Refero Styles")
+		for _, title := range collectTitles(v) {
+			if isPlaceholderTitle(title) {
+				continue
+			}
+			if strings.HasSuffix(title, suffix) {
+				return strings.TrimSuffix(title, suffix)
+			}
+			if fallback == "" {
+				fallback = title
+			}
 		}
 	}
-	return ""
+	return fallback
 }
 
-func findTitle(n any) string {
-	switch t := n.(type) {
-	case []any:
-		if len(t) >= 4 {
-			if tag, _ := t[1].(string); tag == "title" {
-				if props, ok := t[3].(map[string]any); ok {
-					if s, ok := props["children"].(string); ok {
-						return s
+func isPlaceholderTitle(title string) bool {
+	t := strings.TrimSpace(title)
+	return t == "" || strings.HasPrefix(t, "404") || strings.EqualFold(t, "not found")
+}
+
+func collectTitles(n any) []string {
+	var out []string
+	var walk func(any)
+	walk = func(node any) {
+		switch t := node.(type) {
+		case []any:
+			if len(t) >= 4 {
+				if tag, _ := t[1].(string); tag == "title" {
+					if props, ok := t[3].(map[string]any); ok {
+						if s, ok := props["children"].(string); ok {
+							out = append(out, s)
+						}
 					}
 				}
 			}
-		}
-		for _, e := range t {
-			if s := findTitle(e); s != "" {
-				return s
+			for _, e := range t {
+				walk(e)
 			}
-		}
-	case map[string]any:
-		for _, e := range t {
-			if s := findTitle(e); s != "" {
-				return s
+		case map[string]any:
+			for _, e := range t {
+				walk(e)
 			}
 		}
 	}
-	return ""
+	walk(n)
+	return out
 }

@@ -9,7 +9,7 @@ export const load: PageServerLoad = async ({ params, platform, setHeaders }) => 
 	const [detail, artifacts, body] = await Promise.all([
 		getStyleDetail(platform, params.id),
 		getArtifactNames(platform, params.id),
-		getArtifactBody(platform, params.id, DEFAULT_EXPORT)
+		getArtifactBody(platform, params.id, DEFAULT_EXPORT),
 	]);
 
 	if (!detail) error(404, 'No design system with that id is stored here.');
@@ -18,6 +18,6 @@ export const load: PageServerLoad = async ({ params, platform, setHeaders }) => 
 	return {
 		...detail,
 		artifactNames: artifacts.map((a) => a.name),
-		initialExport: body === null ? null : { file: DEFAULT_EXPORT, body }
+		initialExport: body === null ? null : { file: DEFAULT_EXPORT, body },
 	};
 };

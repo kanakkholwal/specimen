@@ -2,11 +2,17 @@ export type ColorFormat = 'hex' | 'rgb' | 'oklch' | 'var';
 
 export function rgbOf(hex: string): [number, number, number] {
 	const v = hex.replace('#', '');
-	const full = v.length === 3 ? v.split('').map((c) => c + c).join('') : v;
+	const full =
+		v.length === 3
+			? v
+					.split('')
+					.map((c) => c + c)
+					.join('')
+			: v;
 	return [
 		Number.parseInt(full.slice(0, 2), 16),
 		Number.parseInt(full.slice(2, 4), 16),
-		Number.parseInt(full.slice(4, 6), 16)
+		Number.parseInt(full.slice(4, 6), 16),
 	];
 }
 
@@ -38,7 +44,7 @@ export function slug(name: string): string {
 
 export function formatColor(
 	format: ColorFormat,
-	color: { hex: string; name: string | null; l: number | null; c: number | null; h: number | null }
+	color: { hex: string; name: string | null; l: number | null; c: number | null; h: number | null },
 ): string {
 	switch (format) {
 		case 'rgb': {

@@ -31,7 +31,7 @@ function statement(prepare: (sql: string) => Runner, sql: string): LocalStatemen
 		async first<T>() {
 			const rows = prepare(sql).all(...bound) as T[];
 			return rows.length ? rows[0] : null;
-		}
+		},
 	};
 	return stmt;
 }
@@ -61,7 +61,7 @@ export async function openLocalD1(): Promise<unknown> {
 	if (!existsSync(BUNDLE)) {
 		throw new Error(
 			`Local index missing at ${BUNDLE}. Build it with:\n` +
-				`  cd server && go run ./cmd/supply export --sqlite ../dist/specimen.db`
+				`  cd server && go run ./cmd/supply export --sqlite ../dist/specimen.db`,
 		);
 	}
 
@@ -71,7 +71,7 @@ export async function openLocalD1(): Promise<unknown> {
 		prepare: (sql: string) => statement(prepare, sql),
 		batch: async (statements: LocalStatement[]) => Promise.all(statements.map((s) => s.all())),
 		dump: async () => new ArrayBuffer(0),
-		exec: async () => ({ count: 0, duration: 0 })
+		exec: async () => ({ count: 0, duration: 0 }),
 	};
 	return cached;
 }

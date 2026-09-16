@@ -1,0 +1,8 @@
+#!/bin/sh
+# Runs the same steps as CI. Skip once with: git push --no-verify
+echo "running gate before push"
+bun scripts/gate.mjs || {
+	echo ""
+	echo "push blocked: fix the failing step, or bypass with --no-verify"
+	exit 1
+}

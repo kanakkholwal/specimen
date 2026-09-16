@@ -300,3 +300,6 @@ func (e *Engine) complete(ctx context.Context, mu *sync.Mutex, rawURL string, me
 	defer mu.Unlock()
 	return e.store.Complete(context.WithoutCancel(ctx), rawURL, meta)
 }
+
+// Fetcher exposes the engine's HTTP client so a caller can run adapter seeds itself.
+func (e *Engine) Fetcher() adapter.Fetcher { return e.fetch }

@@ -1,144 +1,67 @@
 # Specimen
 
-An archive of design systems extracted from real product websites: colour tokens, type scales,
-spacing, components, and ready-to-copy DESIGN.md, CSS variables, Tailwind themes and design tokens.
+A collection of design standards: colour tokens, type scales, spacing, components and
+ready-to-copy DESIGN.md, CSS variables, Tailwind themes and design tokens.
 
-- **Web app**: SvelteKit on Cloudflare Workers, reading D1 and R2.
-- **Scraper**: Go, in [`server/`](server), run locally. Its output is never committed.
+SvelteKit on Cloudflare Workers, reading D1 and R2.
 
-## Why nothing heavy is in git
-
-The crawl produces about 224 MB and the media about 350 MB. None of it belongs in history, so
-`server/data/`, `dist/` and `.wrangler/` are ignored. You regenerate them with the commands below.
-What *is* committed: source, the two pinned upstream JS chunks used to verify the export
-generators, and small test fixtures. The whole repository is under 1 MB.
-
-## One-time setup
+## Setup
 
 ```bash
-bun install                 # web app
-cd server && go build ./... # scraper
-choco install webp          # cwebp, for the image pipeline
+bun install
 ```
 
-## The pipeline
-
-Four steps. Each is idempotent and safe to re-run.
-
-### 1. Crawl
-
-Fetches every style page, parses the embedded extraction payload, and writes both a normalised
-SQLite index and per-style files.
+## Run
 
 ```bash
-cd server
-go run ./cmd/supply crawl --site refero --workers 4 --rps 2
+bun run dev          # reads dist/specimen.db directly
+bun run dev:worker   # runs the real Worker against local D1
 ```
 
-About 11 minutes for 1,290 styles at the default polite rate. Resumable with `--resume`; a second
-run mostly collects 304s. Output lands in `server/data/`:
+`bun run dev` is the everyday one. Use `dev:worker` before a deploy to exercise the D1 binding.
 
-```
-server/data/
-  index.db                     normalised index, 311k rows
-  sites/<origin>/<uuid>/       result.json plus ten generated exports
-  raw/<uuid>.flight.txt.gz     verbatim response, so parser fixes need no re-crawl
-```
+## Index
 
-### 2. Render (optional)
-
-Regenerates the ten export artifacts from stored results without touching the network. Run it after
-changing a generator.
+The index is a SQLite bundle at `dist/specimen.db` for local work, and D1 in production. It is
+loaded out of band and never committed.
 
 ```bash
-go run ./cmd/supply render
+bun run db:local     # load the index into local D1
+bun run db:remote    # load the index into production D1
 ```
 
-### 3. Export the index
+Local D1 is keyed by database name, so renaming it in `wrangler.jsonc` gives you a fresh empty
+one. A Worker reporting `no such table` means exactly that. Re-run `db:local`.
 
-Emits SQL for D1, including the artifact bodies so the app can serve copy actions.
+## Before pushing
+
+`bun run gate` runs everything CI runs, in the same order, so a green gate means a green pipeline.
 
 ```bash
-go run ./cmd/supply export --out ../dist/specimen.sql --sqlite ../dist/specimen.db
-cd ..
-bunx wrangler d1 execute specimen --local  --file=dist/specimen.sql   # local dev
-bunx wrangler d1 execute specimen --remote --file=dist/specimen.sql   # production
+bun run gate
 ```
 
-About 135 MB of SQL. Statements are capped at 32 KB and artifact bodies are chunked, because D1
-rejects anything larger.
-
-### 4. Transcode media
-
-Downloads the source images, encodes WebP with `cwebp`, and writes a manifest. Keys are the source
-content hash, so an unchanged image is never re-encoded or re-uploaded.
+Install the pre-push hook once and it runs itself:
 
 ```bash
-cd server
-go run ./cmd/supply media --out ../dist/media --manifest ../dist/media-manifest.json
+bun run hooks
 ```
 
-Roughly 4,900 images. Videos are deliberately skipped: 2,076 objects at 5.3 GB, and the poster
-frames already give a still. Their URLs stay in the database, so a later backfill needs no re-crawl.
-
-Upload to R2:
-
-```bash
-cd dist/media && bunx wrangler r2 object put specimen-assets/<key> --file=<key> --remote
-```
-
-## Verify
-
-```bash
-cd server
-go test ./...                       # includes byte-for-byte export tests
-go run ./cmd/supply verify          # are the upstream generators unchanged?
-go run ./cmd/supply stats           # what the archive holds
-```
-
-`verify` re-fetches the JavaScript chunks a live style page references and compares them against
-`server/reference/refero-js/SHA256SUMS`. A changed hash means the upstream generators may have moved
-and the golden files should be regenerated.
-
-## Develop
-
-Two ways to run it, and they read the index differently.
-
-```bash
-bun run dev          # vite: reads dist/specimen.db directly, no wrangler needed
-bun run dev:worker   # wrangler: reads local D1, run `bun run db:local` first
-```
-
-`bun run dev` is the everyday one. It opens the SQLite bundle from step 3, so there is no
-miniflare state to go stale. `bun run dev:worker` runs the real Worker against the D1 binding,
-which is worth doing before a deploy.
-
-Local D1 is keyed by database name, so renaming the database in `wrangler.jsonc` silently gives
-you a fresh empty one. If a Worker run reports `no such table`, that is what happened:
-
-```bash
-bun run db:local     # repopulate local D1
-bun run db:remote    # push the same index to production
-```
+Individual checks:
 
 ```bash
 bun run check    # svelte-check on TypeScript 7
-bun run gate     # comment, dash, lint and type gates
+bun run lint     # biome
 bun run build
 ```
 
 ## Layout
 
 ```
-src/                 SvelteKit app
-  lib/server/db.ts   every D1 query
-  components/        site primitives, application components, shadcn-svelte ui
-server/              Go scraper, exporter and media pipeline
-  cmd/supply/        crawl, render, export, media, verify, stats
-  internal/          flight parser, refero adapter, export generators, store
-.notes/              DESIGN.md, design-audit.md
-  docs/              site recon and the original build plans
+src/
+  lib/server/db.ts   every database query
+  components/        site primitives, application components, ui
+  routes/            landing, explore, sites, collections, style detail
 ```
 
-Design system: [.notes/DESIGN.md](.notes/DESIGN.md). Audit: [.notes/design-audit.md](.notes/design-audit.md).
-How the scraper was built and what the site recon found: [.notes/docs/](.notes/docs/).
+Design system and audit live in `.notes/`, local only.

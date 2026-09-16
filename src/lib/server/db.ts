@@ -28,9 +28,8 @@ export type Facet = { value: string; count: number };
 // Production binds D1. Local dev has no binding, so it reads the SQLite bundle the
 // exporter writes, which holds identical content.
 async function db(platform: App.Platform | undefined): Promise<D1Database> {
-	// Dev prefers the bundle even though adapter-cloudflare injects a D1 proxy, because
-	// that proxy points at miniflare state which is keyed by database name and empties
-	// whenever the name changes.
+	// Dev prefers the bundle over the injected D1 proxy, whose miniflare state is keyed by
+	// database name and empties whenever that name changes.
 	if (dev) {
 		try {
 			return (await openLocalD1()) as D1Database;
@@ -62,7 +61,7 @@ type CardRow = Omit<StyleCard, 'colors'> & { colorList: string | null };
 function toCards(rows: CardRow[]): StyleCard[] {
 	return rows.map(({ colorList, ...rest }) => ({
 		...rest,
-		colors: colorList ? colorList.split(',').filter(Boolean).slice(0, 6) : []
+		colors: colorList ? colorList.split(',').filter(Boolean).slice(0, 6) : [],
 	}));
 }
 
@@ -74,7 +73,7 @@ export async function getStats(platform: App.Platform | undefined): Promise<Corp
 			        (SELECT COUNT(*) FROM sites) AS sites,
 			        (SELECT COUNT(*) FROM colors) AS colors,
 			        (SELECT COUNT(*) FROM fonts) AS fonts,
-			        (SELECT COUNT(*) FROM components) AS components`
+			        (SELECT COUNT(*) FROM components) AS components`,
 		)
 		.first<CorpusStats>();
 	if (!row) error(503, 'The index returned no stats.');
@@ -83,13 +82,13 @@ export async function getStats(platform: App.Platform | undefined): Promise<Corp
 
 export async function getRecentStyles(
 	platform: App.Platform | undefined,
-	limit = 12
+	limit = 12,
 ): Promise<StyleCard[]> {
 	const binding = await db(platform);
 	const { results } = await binding
 		.prepare(
 			`${CARD_SELECT} WHERE st.has_result = 1 AND st.site_name IS NOT NULL
-			 ORDER BY st.extracted_at DESC LIMIT ?`
+			 ORDER BY st.extracted_at DESC LIMIT ?`,
 		)
 		.bind(limit)
 		.all<CardRow>();
@@ -106,7 +105,7 @@ export type SearchArgs = {
 
 export async function searchStyles(
 	platform: App.Platform | undefined,
-	{ q, theme, industry, limit = 24, offset = 0 }: SearchArgs
+	{ q, theme, industry, limit = 24, offset = 0 }: SearchArgs,
 ): Promise<{ results: StyleCard[]; total: number }> {
 	const binding = await db(platform);
 	const where: string[] = ['st.has_result = 1'];
@@ -131,32 +130,30 @@ export async function searchStyles(
 		binding
 			.prepare(`${CARD_SELECT} ${clause} ORDER BY st.site_name LIMIT ? OFFSET ?`)
 			.bind(...args, limit, offset),
-		binding
-			.prepare(`SELECT COUNT(*) AS total FROM styles st ${clause}`)
-			.bind(...args)
+		binding.prepare(`SELECT COUNT(*) AS total FROM styles st ${clause}`).bind(...args),
 	]);
 
 	return {
 		results: toCards((list.results ?? []) as CardRow[]),
-		total: ((count.results ?? [])[0] as { total: number } | undefined)?.total ?? 0
+		total: ((count.results ?? [])[0] as { total: number } | undefined)?.total ?? 0,
 	};
 }
 
 export async function getFacets(
-	platform: App.Platform | undefined
+	platform: App.Platform | undefined,
 ): Promise<{ themes: Facet[]; industries: Facet[] }> {
 	const binding = await db(platform);
 	const [themes, industries] = await binding.batch<Facet>([
 		binding.prepare(
 			`SELECT theme AS value, COUNT(*) AS count FROM styles
 			 WHERE has_result = 1 AND theme IS NOT NULL AND theme != ''
-			 GROUP BY theme ORDER BY count DESC`
+			 GROUP BY theme ORDER BY count DESC`,
 		),
 		binding.prepare(
 			`SELECT industry AS value, COUNT(*) AS count FROM styles
 			 WHERE has_result = 1 AND industry IS NOT NULL AND industry != ''
-			 GROUP BY industry ORDER BY count DESC LIMIT 24`
-		)
+			 GROUP BY industry ORDER BY count DESC LIMIT 24`,
+		),
 	]);
 	return { themes: themes.results ?? [], industries: industries.results ?? [] };
 }
@@ -192,11 +189,22 @@ export type NamedColor = {
 	h: number | null;
 };
 export type FontRow = { family: string; source: string; weights: string | null; frequency: number };
-export type TypeScaleRow = { role: string; size: number; lineHeight: number; letterSpacing: number };
+export type TypeScaleRow = {
+	role: string;
+	size: number;
+	lineHeight: number;
+	letterSpacing: number;
+};
 export type ComponentRow = { name: string; role: string; description: string };
 export type GuidelineRow = { kind: string; text: string };
 export type SpacingRow = { key: string; value: string };
-export type MediaRow = { role: string; kind: string; url: string; width: number | null; height: number | null };
+export type MediaRow = {
+	role: string;
+	kind: string;
+	url: string;
+	width: number | null;
+	height: number | null;
+};
 export type ArtifactRow = { name: string; bytes: number };
 export type TypographyRole = {
 	role: string;
@@ -223,11 +231,11 @@ export async function getStyleDetail(platform: App.Platform | undefined, id: str
 		media,
 		artifacts,
 		similar,
-		typography
+		typography,
 	] = await binding.batch([
-			binding
-				.prepare(
-					`SELECT st.id, COALESCE(st.site_name,'') AS siteName, COALESCE(st.url,'') AS url,
+		binding
+			.prepare(
+				`SELECT st.id, COALESCE(st.site_name,'') AS siteName, COALESCE(st.url,'') AS url,
 					        COALESCE(si.origin,'') AS origin, COALESCE(si.etld1,'') AS etld1,
 					        st.theme, st.industry, st.color_scheme AS colorScheme,
 					        st.north_star AS northStar, st.north_star_detail AS northStarDetail,
@@ -235,60 +243,56 @@ export async function getStyleDetail(platform: App.Platform | undefined, id: str
 					        st.scale_name AS scaleName, st.scale_ratio AS scaleRatio,
 					        st.extracted_at AS extractedAt, st.element_count AS elementCount
 					 FROM styles st LEFT JOIN sites si ON si.id = st.site_id
-					 WHERE st.id = ? AND st.has_result = 1`
-				)
-				.bind(id),
-			binding
-				.prepare(
-					`SELECT c.hex, sc.name, sc.role, sc.group_name AS "group",
+					 WHERE st.id = ? AND st.has_result = 1`,
+			)
+			.bind(id),
+		binding
+			.prepare(
+				`SELECT c.hex, sc.name, sc.role, sc.group_name AS "group",
 					        c.oklch_l AS l, c.oklch_c AS c, c.oklch_h AS h
 					 FROM style_colors sc JOIN colors c ON c.id = sc.color_id
-					 WHERE sc.style_id = ? AND sc.origin = 'system' ORDER BY sc.ord`
-				)
-				.bind(id),
-			binding
-				.prepare(
-					`SELECT f.family, f.source, sf.weights, sf.frequency
+					 WHERE sc.style_id = ? AND sc.origin = 'system' ORDER BY sc.ord`,
+			)
+			.bind(id),
+		binding
+			.prepare(
+				`SELECT f.family, f.source, sf.weights, sf.frequency
 					 FROM style_fonts sf JOIN fonts f ON f.id = sf.font_id
-					 WHERE sf.style_id = ? ORDER BY sf.frequency DESC`
-				)
-				.bind(id),
-			binding
-				.prepare(
-					`SELECT role, size, line_height AS lineHeight, letter_spacing AS letterSpacing
-					 FROM type_scale WHERE style_id = ? ORDER BY ord`
-				)
-				.bind(id),
-			binding
-				.prepare(`SELECT name, role, description FROM components WHERE style_id = ? ORDER BY ord`)
-				.bind(id),
-			binding
-				.prepare(`SELECT kind, text FROM guidelines WHERE style_id = ? ORDER BY kind, ord`)
-				.bind(id),
-			binding.prepare(`SELECT key, value FROM spacing_map WHERE style_id = ? ORDER BY key`).bind(id),
-			binding
-				.prepare(
-					`SELECT sm.role, m.kind, m.url, m.width, m.height
+					 WHERE sf.style_id = ? ORDER BY sf.frequency DESC`,
+			)
+			.bind(id),
+		binding
+			.prepare(
+				`SELECT role, size, line_height AS lineHeight, letter_spacing AS letterSpacing
+					 FROM type_scale WHERE style_id = ? ORDER BY ord`,
+			)
+			.bind(id),
+		binding
+			.prepare(`SELECT name, role, description FROM components WHERE style_id = ? ORDER BY ord`)
+			.bind(id),
+		binding
+			.prepare(`SELECT kind, text FROM guidelines WHERE style_id = ? ORDER BY kind, ord`)
+			.bind(id),
+		binding.prepare(`SELECT key, value FROM spacing_map WHERE style_id = ? ORDER BY key`).bind(id),
+		binding
+			.prepare(
+				`SELECT sm.role, m.kind, m.url, m.width, m.height
 					 FROM style_media sm JOIN media m ON m.id = sm.media_id
-					 WHERE sm.style_id = ?`
-				)
-				.bind(id),
-			binding
-				.prepare(`SELECT name, bytes FROM artifacts WHERE style_id = ? ORDER BY name`)
-				.bind(id),
-			binding
-				.prepare(`SELECT business, why FROM similar WHERE style_id = ? ORDER BY ord`)
-				.bind(id),
-			binding
-				.prepare(
-					`SELECT role, family, sizes, weight, line_height AS lineHeight,
+					 WHERE sm.style_id = ?`,
+			)
+			.bind(id),
+		binding.prepare(`SELECT name, bytes FROM artifacts WHERE style_id = ? ORDER BY name`).bind(id),
+		binding.prepare(`SELECT business, why FROM similar WHERE style_id = ? ORDER BY ord`).bind(id),
+		binding
+			.prepare(
+				`SELECT role, family, sizes, weight, line_height AS lineHeight,
 					        COALESCE(substitute,'') AS substitute,
 					        COALESCE(letter_spacing,'') AS letterSpacing,
 					        COALESCE(font_features,'') AS fontFeatures
-					 FROM typography_roles WHERE style_id = ? ORDER BY ord`
-				)
-				.bind(id)
-		]);
+					 FROM typography_roles WHERE style_id = ? ORDER BY ord`,
+			)
+			.bind(id),
+	]);
 
 	const detail = ((style.results ?? [])[0] ?? null) as StyleDetail | null;
 	if (!detail) return null;
@@ -304,7 +308,7 @@ export async function getStyleDetail(platform: App.Platform | undefined, id: str
 		media: (media.results ?? []) as MediaRow[],
 		artifacts: (artifacts.results ?? []) as ArtifactRow[],
 		similar: (similar.results ?? []) as { business: string; why: string }[],
-		typography: (typography.results ?? []) as TypographyRole[]
+		typography: (typography.results ?? []) as TypographyRole[],
 	};
 }
 
@@ -317,27 +321,34 @@ export async function getSites(platform: App.Platform | undefined, limit = 200, 
 			.prepare(
 				`SELECT si.origin, si.etld1, si.site_name AS siteName, COUNT(st.id) AS styles
 				 FROM sites si JOIN styles st ON st.site_id = si.id AND st.has_result = 1
-				 GROUP BY si.id ORDER BY si.origin LIMIT ? OFFSET ?`
+				 GROUP BY si.id ORDER BY si.origin LIMIT ? OFFSET ?`,
 			)
 			.bind(limit, offset),
-		binding.prepare(`SELECT COUNT(*) AS total FROM sites`)
+		binding.prepare(`SELECT COUNT(*) AS total FROM sites`),
 	]);
 	return {
 		sites: (list.results ?? []) as SiteRow[],
-		total: ((count.results ?? [])[0] as { total: number } | undefined)?.total ?? 0
+		total: ((count.results ?? [])[0] as { total: number } | undefined)?.total ?? 0,
 	};
 }
 
 export async function getStylesForOrigin(platform: App.Platform | undefined, origin: string) {
 	const binding = await db(platform);
 	const { results } = await binding
-		.prepare(`${CARD_SELECT} WHERE st.has_result = 1 AND si.origin = ? ORDER BY st.extracted_at DESC`)
+		.prepare(
+			`${CARD_SELECT} WHERE st.has_result = 1 AND si.origin = ? ORDER BY st.extracted_at DESC`,
+		)
 		.bind(origin)
 		.all<CardRow>();
 	return toCards(results ?? []);
 }
 
-export type CollectionRow = { slug: string; title: string | null; kind: string | null; styles: number };
+export type CollectionRow = {
+	slug: string;
+	title: string | null;
+	kind: string | null;
+	styles: number;
+};
 
 export async function getCollections(platform: App.Platform | undefined) {
 	const binding = await db(platform);
@@ -345,7 +356,7 @@ export async function getCollections(platform: App.Platform | undefined) {
 		.prepare(
 			`SELECT c.slug, c.title, c.kind, COUNT(cs.style_id) AS styles
 			 FROM collections c LEFT JOIN collection_styles cs ON cs.collection_id = c.id
-			 GROUP BY c.id HAVING styles > 0 ORDER BY styles DESC`
+			 GROUP BY c.id HAVING styles > 0 ORDER BY styles DESC`,
 		)
 		.all<CollectionRow>();
 	return results ?? [];
@@ -360,11 +371,15 @@ export async function getCollection(platform: App.Platform | undefined, slug: st
 				`${CARD_SELECT}
 				 JOIN collection_styles cs ON cs.style_id = st.id
 				 JOIN collections c ON c.id = cs.collection_id
-				 WHERE c.slug = ? AND st.has_result = 1 ORDER BY cs.ord`
+				 WHERE c.slug = ? AND st.has_result = 1 ORDER BY cs.ord`,
 			)
-			.bind(slug)
+			.bind(slug),
 	]);
-	const info = ((meta.results ?? [])[0] ?? null) as { slug: string; title: string | null; kind: string | null } | null;
+	const info = ((meta.results ?? [])[0] ?? null) as {
+		slug: string;
+		title: string | null;
+		kind: string | null;
+	} | null;
 	if (!info) return null;
 	return { collection: info, styles: toCards((list.results ?? []) as CardRow[]) };
 }
@@ -374,7 +389,7 @@ export async function getCollection(platform: App.Platform | undefined, slug: st
 export async function getArtifactBody(
 	platform: App.Platform | undefined,
 	styleId: string,
-	name: string
+	name: string,
 ): Promise<string | null> {
 	const binding = await db(platform);
 	const { results } = await binding

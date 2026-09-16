@@ -15,9 +15,9 @@ export const load: PageServerLoad = async ({ url, platform, setHeaders }) => {
 			theme,
 			industry,
 			limit: PER_PAGE,
-			offset: (page - 1) * PER_PAGE
+			offset: (page - 1) * PER_PAGE,
 		}),
-		getFacets(platform)
+		getFacets(platform),
 	]);
 
 	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=600' });
@@ -26,6 +26,6 @@ export const load: PageServerLoad = async ({ url, platform, setHeaders }) => {
 		facets,
 		filters: { q, theme, industry },
 		page,
-		perPage: PER_PAGE
+		perPage: PER_PAGE,
 	};
 };

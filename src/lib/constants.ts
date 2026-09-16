@@ -7,13 +7,13 @@ export const site = {
 	url: 'https://specimen.nexonauts.com',
 	repo: 'https://github.com/kanakkholwal/specimen',
 	support: 'support@nexonauts.com',
-	parent: { name: 'Nexonauts', url: 'https://nexonauts.com' }
+	parent: { name: 'Nexonauts', url: 'https://nexonauts.com' },
 } as const;
 
 export const nav = [
 	{ href: '/explore', label: 'Explore' },
 	{ href: '/sites', label: 'Sites' },
-	{ href: '/collections', label: 'Collections' }
+	{ href: '/collections', label: 'Collections' },
 ] as const;
 
 export const exportFormats = [
@@ -22,5 +22,5 @@ export const exportFormats = [
 	{ file: 'variables.extended.css', label: 'CSS Variables', hint: 'Extended', lang: 'css' },
 	{ file: 'theme.extended.css', label: 'Tailwind v4', hint: 'Extended', lang: 'css' },
 	{ file: 'tokens.extended.json', label: 'Design Tokens', hint: 'Extended', lang: 'json' },
-	{ file: 'design-system.json', label: 'Design JSON', hint: '', lang: 'json' }
+	{ file: 'design-system.json', label: 'Design JSON', hint: '', lang: 'json' },
 ] as const;

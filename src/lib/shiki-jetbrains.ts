@@ -13,7 +13,7 @@ const darculaColors = {
 	tag: '#e8bf6a',
 	attribute: '#bababa',
 	heading: '#ffc66d',
-	link: '#287bde'
+	link: '#287bde',
 };
 
 const intellijColors = {
@@ -27,10 +27,14 @@ const intellijColors = {
 	tag: '#0033b3',
 	attribute: '#174ad4',
 	heading: '#00627a',
-	link: '#1750eb'
+	link: '#1750eb',
 };
 
-function build(name: string, type: 'light' | 'dark', c: typeof darculaColors): ThemeRegistrationRaw {
+function build(
+	name: string,
+	type: 'light' | 'dark',
+	c: typeof darculaColors,
+): ThemeRegistrationRaw {
 	return {
 		name,
 		type,
@@ -40,42 +44,45 @@ function build(name: string, type: 'light' | 'dark', c: typeof darculaColors): T
 			{ scope: ['comment', 'punctuation.definition.comment'], settings: { foreground: c.comment } },
 			{
 				scope: ['keyword', 'storage', 'storage.type', 'keyword.control', 'entity.name.tag'],
-				settings: { foreground: c.keyword }
+				settings: { foreground: c.keyword },
 			},
 			{
 				scope: ['string', 'string.quoted', 'markup.inline.raw', 'markup.raw'],
-				settings: { foreground: c.string }
+				settings: { foreground: c.string },
 			},
 			{
 				scope: ['constant.numeric', 'keyword.other.unit', 'constant.other.color'],
-				settings: { foreground: c.number }
+				settings: { foreground: c.number },
 			},
 			{
 				scope: ['entity.name.function', 'support.function', 'meta.function-call'],
-				settings: { foreground: c.fn }
+				settings: { foreground: c.fn },
 			},
 			{
 				scope: ['constant.language', 'variable.other.constant', 'support.constant'],
-				settings: { foreground: c.constant }
+				settings: { foreground: c.constant },
 			},
 			{
 				scope: [
 					'support.type.property-name',
 					'meta.object-literal.key',
-					'entity.other.attribute-name'
+					'entity.other.attribute-name',
 				],
-				settings: { foreground: c.attribute }
+				settings: { foreground: c.attribute },
 			},
 			{
 				scope: ['entity.other.attribute-name.class', 'entity.other.attribute-name.id'],
-				settings: { foreground: c.tag }
+				settings: { foreground: c.tag },
 			},
-			{ scope: ['markup.heading', 'entity.name.section'], settings: { foreground: c.heading, fontStyle: 'bold' } },
+			{
+				scope: ['markup.heading', 'entity.name.section'],
+				settings: { foreground: c.heading, fontStyle: 'bold' },
+			},
 			{ scope: ['markup.bold'], settings: { fontStyle: 'bold' } },
 			{ scope: ['markup.italic'], settings: { fontStyle: 'italic' } },
 			{ scope: ['markup.underline.link', 'string.other.link'], settings: { foreground: c.link } },
-			{ scope: ['punctuation', 'meta.brace'], settings: { foreground: c.fg } }
-		]
+			{ scope: ['punctuation', 'meta.brace'], settings: { foreground: c.fg } },
+		],
 	};
 }
 

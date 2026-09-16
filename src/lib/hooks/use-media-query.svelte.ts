@@ -18,6 +18,6 @@ export function useMediaQuery(query: string) {
 	return {
 		get value() {
 			return matches;
-		}
+		},
 	};
 }

@@ -18,12 +18,12 @@ const twMerge = extendTailwindMerge({
 						'heading',
 						'heading-lg',
 						'display',
-						'display-xl'
-					]
-				}
-			]
-		}
-	}
+						'display-xl',
+					],
+				},
+			],
+		},
+	},
 });
 
 export function cn(...inputs: ClassValue[]) {

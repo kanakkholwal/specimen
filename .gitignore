@@ -5,9 +5,9 @@ node_modules/
 
 # build output
 .svelte-kit/
+.svelte-kit-build/
 build/
 dist/
-scripts/
 .vercel/
 .cloudflare/
 .wrangler/

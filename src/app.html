@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="en">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,6 +7,147 @@
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
+		<div id="boot" aria-hidden="true">
+			<div class="boot-stack">
+				<svg class="boot-mark" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+					<rect width="24" height="24" rx="7" fill="var(--boot-primary)" />
+					<g fill="var(--boot-on-primary)">
+						<rect x="6" y="7" width="12" height="2.5" rx="1.25" />
+						<rect x="6" y="11" width="9" height="2.5" rx="1.25" />
+						<rect x="6" y="15" width="5" height="2.5" rx="1.25" />
+					</g>
+				</svg>
+				<div class="boot-track"><span></span></div>
+			</div>
+			<style>
+				:root {
+					--boot-bg: #f5f5f5;
+					--boot-track: #e5e5e5;
+					--boot-primary: #4338ca;
+					--boot-on-primary: #ffffff;
+				}
+
+				:root.dark {
+					--boot-bg: #0a0a0a;
+					--boot-track: #303030;
+					--boot-primary: #a5b4fc;
+					--boot-on-primary: #0a0a0a;
+				}
+
+				html,
+				body {
+					margin: 0;
+					background: var(--boot-bg);
+				}
+
+				#boot {
+					position: fixed;
+					inset: 0;
+					z-index: 9999;
+					display: grid;
+					place-items: center;
+					background: var(--boot-bg);
+					transition: opacity 200ms cubic-bezier(0.32, 0.72, 0, 1);
+				}
+
+				#boot[data-done] {
+					opacity: 0;
+					pointer-events: none;
+				}
+
+				.boot-stack {
+					display: flex;
+					flex-direction: column;
+					align-items: center;
+					gap: 28px;
+					opacity: 0;
+					animation: boot-in 300ms cubic-bezier(0.32, 0.72, 0, 1) 120ms forwards;
+				}
+
+				.boot-mark {
+					width: 44px;
+					height: 44px;
+				}
+
+				.boot-mark g rect {
+					opacity: 0;
+					animation: boot-bar 600ms cubic-bezier(0.32, 0.72, 0, 1) 200ms forwards;
+				}
+
+				.boot-mark g rect:nth-child(2) {
+					animation-delay: 300ms;
+				}
+
+				.boot-mark g rect:nth-child(3) {
+					animation-delay: 380ms;
+				}
+
+				.boot-track {
+					position: relative;
+					width: 96px;
+					height: 2px;
+					overflow: hidden;
+					border-radius: 999px;
+					background: var(--boot-track);
+				}
+
+				.boot-track span {
+					position: absolute;
+					inset: 0;
+					width: 40%;
+					border-radius: inherit;
+					background: var(--boot-primary);
+					animation: boot-slide 1200ms cubic-bezier(0.65, 0, 0.35, 1) infinite;
+				}
+
+				@keyframes boot-in {
+					from {
+						opacity: 0;
+						transform: translateY(4px);
+					}
+					to {
+						opacity: 1;
+						transform: none;
+					}
+				}
+
+				@keyframes boot-bar {
+					from {
+						opacity: 0;
+						transform: translateX(-6px);
+					}
+					to {
+						opacity: 1;
+						transform: none;
+					}
+				}
+
+				@keyframes boot-slide {
+					from {
+						transform: translateX(-100%);
+					}
+					to {
+						transform: translateX(250%);
+					}
+				}
+
+				@media (prefers-reduced-motion: reduce) {
+					.boot-stack {
+						animation-duration: 1ms;
+					}
+					.boot-mark g rect {
+						animation: none;
+						opacity: 1;
+					}
+					.boot-track span {
+						animation: none;
+						width: 100%;
+						opacity: 0.4;
+					}
+				}
+			</style>
+		</div>
+
 		<div style="display: contents">%sveltekit.body%</div>
 	</body>
 </html>

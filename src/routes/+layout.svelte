@@ -1,12 +1,24 @@
 <script lang="ts">
+	import { onMount } from 'svelte';
+	import { ModeWatcher } from 'mode-watcher';
 	import '@fontsource-variable/google-sans';
 	import '@fontsource-variable/inter';
 	import '@fontsource-variable/jetbrains-mono';
 	import '@fontsource-variable/source-code-pro';
 	import '../app.css';
-	import { ModeWatcher } from 'mode-watcher';
+	import NavProgress from '$components/common/NavProgress.svelte';
 
 	let { children } = $props();
+
+	onMount(() => {
+		const boot = document.getElementById('boot');
+		if (!boot) return;
+		boot.dataset.done = '';
+		const remove = () => boot.remove();
+		boot.addEventListener('transitionend', remove, { once: true });
+		// Belt and braces: a skipped transition under reduced motion never fires the event.
+		setTimeout(remove, 400);
+	});
 </script>
 
 <a
@@ -17,5 +29,6 @@
 </a>
 
 <ModeWatcher />
+<NavProgress />
 
 {@render children()}

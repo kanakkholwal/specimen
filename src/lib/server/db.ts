@@ -1,4 +1,6 @@
+import { dev } from '$app/environment';
 import { error } from '@sveltejs/kit';
+import { openLocalD1 } from '$server/local-db';
 
 export type StyleCard = {
 	id: string;
@@ -23,11 +25,25 @@ export type CorpusStats = {
 
 export type Facet = { value: string; count: number };
 
-function db(platform: App.Platform | undefined): D1Database {
-	if (!platform?.env?.DB) {
-		error(503, 'The index is not reachable. Check the D1 binding.');
+// Production binds D1. Local dev has no binding, so it reads the SQLite bundle the
+// exporter writes, which holds identical content.
+async function db(platform: App.Platform | undefined): Promise<D1Database> {
+	// Dev prefers the bundle even though adapter-cloudflare injects a D1 proxy, because
+	// that proxy points at miniflare state which is keyed by database name and empties
+	// whenever the name changes.
+	if (dev) {
+		try {
+			return (await openLocalD1()) as D1Database;
+		} catch (e) {
+			// Never swallow this: hiding it makes a local problem look like a D1 problem.
+			console.error('[specimen] local index unavailable:', e);
+			if (!platform?.env?.DB) {
+				error(503, e instanceof Error ? e.message : 'The local index could not be opened.');
+			}
+		}
 	}
-	return platform.env.DB;
+	if (platform?.env?.DB) return platform.env.DB;
+	error(503, 'The index is not reachable. Check the D1 binding.');
 }
 
 const CARD_SELECT = `
@@ -51,7 +67,8 @@ function toCards(rows: CardRow[]): StyleCard[] {
 }
 
 export async function getStats(platform: App.Platform | undefined): Promise<CorpusStats> {
-	const row = await db(platform)
+	const binding = await db(platform);
+	const row = await binding
 		.prepare(
 			`SELECT (SELECT COUNT(*) FROM styles WHERE has_result = 1) AS styles,
 			        (SELECT COUNT(*) FROM sites) AS sites,
@@ -68,7 +85,8 @@ export async function getRecentStyles(
 	platform: App.Platform | undefined,
 	limit = 12
 ): Promise<StyleCard[]> {
-	const { results } = await db(platform)
+	const binding = await db(platform);
+	const { results } = await binding
 		.prepare(
 			`${CARD_SELECT} WHERE st.has_result = 1 AND st.site_name IS NOT NULL
 			 ORDER BY st.extracted_at DESC LIMIT ?`
@@ -90,7 +108,7 @@ export async function searchStyles(
 	platform: App.Platform | undefined,
 	{ q, theme, industry, limit = 24, offset = 0 }: SearchArgs
 ): Promise<{ results: StyleCard[]; total: number }> {
-	const binding = db(platform);
+	const binding = await db(platform);
 	const where: string[] = ['st.has_result = 1'];
 	const args: unknown[] = [];
 
@@ -127,7 +145,7 @@ export async function searchStyles(
 export async function getFacets(
 	platform: App.Platform | undefined
 ): Promise<{ themes: Facet[]; industries: Facet[] }> {
-	const binding = db(platform);
+	const binding = await db(platform);
 	const [themes, industries] = await binding.batch<Facet>([
 		binding.prepare(
 			`SELECT theme AS value, COUNT(*) AS count FROM styles
@@ -192,7 +210,7 @@ export type TypographyRole = {
 };
 
 export async function getStyleDetail(platform: App.Platform | undefined, id: string) {
-	const binding = db(platform);
+	const binding = await db(platform);
 	// One batch, so the detail page never becomes a chain of round trips.
 	const [
 		style,
@@ -293,7 +311,7 @@ export async function getStyleDetail(platform: App.Platform | undefined, id: str
 export type SiteRow = { origin: string; etld1: string; siteName: string | null; styles: number };
 
 export async function getSites(platform: App.Platform | undefined, limit = 200, offset = 0) {
-	const binding = db(platform);
+	const binding = await db(platform);
 	const [list, count] = await binding.batch([
 		binding
 			.prepare(
@@ -311,7 +329,8 @@ export async function getSites(platform: App.Platform | undefined, limit = 200, 
 }
 
 export async function getStylesForOrigin(platform: App.Platform | undefined, origin: string) {
-	const { results } = await db(platform)
+	const binding = await db(platform);
+	const { results } = await binding
 		.prepare(`${CARD_SELECT} WHERE st.has_result = 1 AND si.origin = ? ORDER BY st.extracted_at DESC`)
 		.bind(origin)
 		.all<CardRow>();
@@ -321,7 +340,8 @@ export async function getStylesForOrigin(platform: App.Platform | undefined, ori
 export type CollectionRow = { slug: string; title: string | null; kind: string | null; styles: number };
 
 export async function getCollections(platform: App.Platform | undefined) {
-	const { results } = await db(platform)
+	const binding = await db(platform);
+	const { results } = await binding
 		.prepare(
 			`SELECT c.slug, c.title, c.kind, COUNT(cs.style_id) AS styles
 			 FROM collections c LEFT JOIN collection_styles cs ON cs.collection_id = c.id
@@ -332,7 +352,7 @@ export async function getCollections(platform: App.Platform | undefined) {
 }
 
 export async function getCollection(platform: App.Platform | undefined, slug: string) {
-	const binding = db(platform);
+	const binding = await db(platform);
 	const [meta, list] = await binding.batch([
 		binding.prepare(`SELECT slug, title, kind FROM collections WHERE slug = ?`).bind(slug),
 		binding
@@ -356,7 +376,8 @@ export async function getArtifactBody(
 	styleId: string,
 	name: string
 ): Promise<string | null> {
-	const { results } = await db(platform)
+	const binding = await db(platform);
+	const { results } = await binding
 		.prepare(`SELECT chunk FROM artifact_content WHERE style_id = ? AND name = ? ORDER BY seq`)
 		.bind(styleId, name)
 		.all<{ chunk: string }>();
@@ -365,7 +386,8 @@ export async function getArtifactBody(
 }
 
 export async function getArtifactNames(platform: App.Platform | undefined, styleId: string) {
-	const { results } = await db(platform)
+	const binding = await db(platform);
+	const { results } = await binding
 		.prepare(`SELECT name, bytes FROM artifacts WHERE style_id = ? ORDER BY name`)
 		.bind(styleId)
 		.all<{ name: string; bytes: number }>();

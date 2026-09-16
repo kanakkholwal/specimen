@@ -15,7 +15,10 @@
     "gate:comments": "bun scripts/check-comments.mjs --all",
     "gate:dashes": "bun scripts/check-dashes.mjs",
     "gate": "bun run gate:comments && bun run gate:dashes && bun run lint && bun run check",
-    "types": "bun scripts/gen-worker-types.mjs"
+    "types": "bun scripts/gen-worker-types.mjs",
+    "dev:worker": "wrangler dev",
+    "db:local": "wrangler d1 execute specimen --local --file=dist/specimen.sql",
+    "db:remote": "wrangler d1 execute specimen --remote --file=dist/specimen.sql"
   },
   "dependencies": {
     "@fontsource-variable/google-sans": "^5.2.1",
@@ -33,6 +36,7 @@
     "@sveltejs/enhanced-img": "^0.11.0",
     "@sveltejs/kit": "^2.70.3",
     "@sveltejs/vite-plugin-svelte": "^7.3.0",
+    "@types/node": "^22.20.3",
     "@typescript/native": "npm:typescript@^7.0.2",
     "bits-ui": "^2.19.2",
     "clsx": "^2.1.1",

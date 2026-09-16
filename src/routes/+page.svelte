@@ -2,13 +2,16 @@
 	import { IconArrowRight, IconSearch, IconSparkles } from '@tabler/icons-svelte';
 	import StyleCardItem from '$components/application/StyleCard.svelte';
 	import CountUp from '$components/landing/CountUp.svelte';
+	import FeatureBento from '$components/landing/FeatureBento.svelte';
 	import StatStrip from '$components/landing/StatStrip.svelte';
 	import BrandPanel from '$components/site/BrandPanel.svelte';
+	import FaqList from '$components/site/FaqList.svelte';
 	import RailFrame from '$components/site/RailFrame.svelte';
 	import RailRow from '$components/site/RailRow.svelte';
 	import TiltedChip from '$components/site/TiltedChip.svelte';
 	import { Button } from '$components/ui/button';
 	import { site } from '$lib/constants';
+	import { faqs } from '$lib/faq';
 	import type { PageData } from './$types';
 
 	let { data }: { data: PageData } = $props();
@@ -94,6 +97,28 @@
 				No systems are indexed yet. Run the crawler and import the index.
 			</p>
 		{/if}
+	</RailRow>
+
+	<RailRow label="What you get" class="py-10 sm:py-14">
+		<div class="mb-8 max-w-2xl">
+			<h2 class="text-heading-lg font-medium">What each entry holds</h2>
+			<p class="mt-2 text-body text-muted-foreground">
+				Not a screenshot gallery. Every system is stored as structured, measured data.
+			</p>
+		</div>
+		<FeatureBento stats={data.stats} />
+	</RailRow>
+
+	<RailRow label="Questions" class="py-10 sm:py-14">
+		<div class="grid gap-8 lg:grid-cols-[22rem_minmax(0,1fr)] lg:gap-20">
+			<div class="lg:sticky lg:top-28 lg:self-start">
+				<h2 class="text-heading-lg font-medium">Questions,<span class="block text-primary">answered plainly</span></h2>
+				<p class="mt-4 text-body text-muted-foreground">
+					What this is, where it comes from, and what you may do with it.
+				</p>
+			</div>
+			<FaqList items={faqs} variant="cards" />
+		</div>
 	</RailRow>
 
 	<RailRow label="Call to action" class="py-10 sm:py-14">

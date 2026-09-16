@@ -59,7 +59,7 @@ go run ./cmd/supply render
 Emits SQL for D1, including the artifact bodies so the app can serve copy actions.
 
 ```bash
-go run ./cmd/supply export --out ../dist/specimen.sql
+go run ./cmd/supply export --out ../dist/specimen.sql --sqlite ../dist/specimen.db
 cd ..
 bunx wrangler d1 execute specimen --local  --file=dist/specimen.sql   # local dev
 bunx wrangler d1 execute specimen --remote --file=dist/specimen.sql   # production
@@ -102,8 +102,26 @@ and the golden files should be regenerated.
 
 ## Develop
 
+Two ways to run it, and they read the index differently.
+
 ```bash
-bun run dev      # needs step 3 run with --local at least once
+bun run dev          # vite: reads dist/specimen.db directly, no wrangler needed
+bun run dev:worker   # wrangler: reads local D1, run `bun run db:local` first
+```
+
+`bun run dev` is the everyday one. It opens the SQLite bundle from step 3, so there is no
+miniflare state to go stale. `bun run dev:worker` runs the real Worker against the D1 binding,
+which is worth doing before a deploy.
+
+Local D1 is keyed by database name, so renaming the database in `wrangler.jsonc` silently gives
+you a fresh empty one. If a Worker run reports `no such table`, that is what happened:
+
+```bash
+bun run db:local     # repopulate local D1
+bun run db:remote    # push the same index to production
+```
+
+```bash
 bun run check    # svelte-check on TypeScript 7
 bun run gate     # comment, dash, lint and type gates
 bun run build

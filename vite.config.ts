@@ -4,5 +4,9 @@ import tailwindcss from '@tailwindcss/vite';
 import { defineConfig } from 'vite';
 
 export default defineConfig({
-	plugins: [tailwindcss(), enhancedImages(), sveltekit()]
+	plugins: [tailwindcss(), enhancedImages(), sveltekit()],
+	ssr: {
+		// Runtime sqlite builtins are opened by the dev-only local index adapter.
+		external: ['bun:sqlite', 'node:sqlite']
+	}
 });

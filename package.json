@@ -15,7 +15,7 @@
     "gate:comments": "bun scripts/check-comments.mjs --all",
     "gate:dashes": "bun scripts/check-dashes.mjs",
     "gate": "bun scripts/gate.mjs",
-    "types": "bun scripts/gen-worker-types.mjs",
+    "types": "wrangler types src/worker-configuration.d.ts",
     "dev:worker": "wrangler dev",
     "db:local": "wrangler d1 execute specimen --local --file=dist/specimen.sql",
     "db:remote": "wrangler d1 execute specimen --remote --file=dist/specimen.sql",

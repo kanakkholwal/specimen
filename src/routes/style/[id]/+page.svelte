@@ -8,6 +8,7 @@
 		IconX
 	} from '@tabler/icons-svelte';
 	import ColorPalette from '$components/application/ColorPalette.svelte';
+	import ComponentGallery from '$components/application/ComponentGallery.svelte';
 	import ExportPanel from '$components/application/ExportPanel.svelte';
 	import TypographySpecimen from '$components/application/TypographySpecimen.svelte';
 	import RailFrame from '$components/site/RailFrame.svelte';
@@ -170,17 +171,13 @@
 	{#if data.components.length}
 		<RailRow label="Components" class="py-8 sm:py-10">
 			<h2 class="text-heading-sm font-medium">Components</h2>
-			<ul class="mt-6 grid gap-4 lg:grid-cols-2">
-				{#each data.components as component (component.name)}
-					<li class="panel-card p-5">
-						<h3 class="text-body-lg font-medium">{component.name}</h3>
-						<p class="mt-1 text-caption text-primary">{component.role}</p>
-						<p class="mt-3 text-body leading-relaxed text-muted-foreground">
-							{component.description}
-						</p>
-					</li>
-				{/each}
-			</ul>
+			<p class="mt-2 max-w-2xl text-body text-muted-foreground">
+				{data.components.length} components, previewed with the colours, radii and spacing recorded
+				for each one.
+			</p>
+			<div class="mt-6">
+				<ComponentGallery components={data.components} colors={data.colors} />
+			</div>
 		</RailRow>
 	{/if}
 

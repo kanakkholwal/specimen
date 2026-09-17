@@ -12,8 +12,10 @@ const steps = [
 	{ name: 'dashes', cmd: 'bun', args: ['scripts/check-dashes.mjs'] },
 	{ name: 'lint', cmd: 'bunx', args: ['--bun', 'biome', 'lint', './src'] },
 	{ name: 'format', cmd: 'bunx', args: ['--bun', 'biome', 'format', './src'] },
+	// worker-configuration.d.ts is generated and untracked, so CI has to make it before typechecking.
+	{ name: 'worker types', cmd: 'bun', args: ['run', 'types'] },
 	{ name: 'types', cmd: 'bun', args: ['run', 'check'] },
-	{ name: 'build', cmd: 'bun', args: ['run', 'build'], env: { SVELTE_KIT_OUT_DIR: '.svelte-kit-build' } }
+	{ name: 'build', cmd: 'bun', args: ['run', 'build'], env: { SVELTE_KIT_OUT_DIR: '.svelte-kit/build' } }
 ];
 
 if (existsSync('server/go.mod')) {

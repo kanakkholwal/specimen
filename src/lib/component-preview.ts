@@ -48,6 +48,14 @@ function colorIn(clause: string): string | null {
 	return NAMED[found.toLowerCase()] ?? found;
 }
 
+// The gap may not contain a digit, or "15px vertical / 24px horizontal" reads 15 as both.
+const BEFORE_WORD = /(\d+(?:\.\d+)?)\s*px[^\d]{0,12}/;
+
+function lengthBefore(clause: string, word: string): number | null {
+	const match = clause.match(new RegExp(BEFORE_WORD.source + word, 'i'));
+	return match ? Number(match[1]) : null;
+}
+
 function lengths(clause: string): number[] {
 	return [...clause.matchAll(PX)].map((m) => Number(m[1]));
 }
@@ -75,10 +83,10 @@ export function parseFacts(description: string): ComponentFacts {
 		if (isRadius && px.length && facts.radius === null) facts.radius = px[0];
 
 		if (/padding|gutter/i.test(clause) && px.length && facts.padY === null) {
-			const vertical = clause.match(/(\d+(?:\.\d+)?)\s*px[^,]{0,18}vertical/i);
-			const horizontal = clause.match(/(\d+(?:\.\d+)?)\s*px[^,]{0,18}horizontal/i);
-			facts.padY = vertical ? Number(vertical[1]) : px[0];
-			facts.padX = horizontal ? Number(horizontal[1]) : (px[1] ?? px[0]);
+			const vertical = lengthBefore(clause, 'vertical');
+			const horizontal = lengthBefore(clause, 'horizontal');
+			facts.padY = vertical ?? px[0];
+			facts.padX = horizontal ?? px[1] ?? px[0];
 		}
 
 		if (isBorder && !isRadius) {

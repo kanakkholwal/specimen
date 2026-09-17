@@ -20,6 +20,7 @@
         "@sveltejs/enhanced-img": "^0.11.0",
         "@sveltejs/kit": "^2.70.3",
         "@sveltejs/vite-plugin-svelte": "^7.3.0",
+        "@types/bun": "^1.4.2",
         "@types/node": "^22.20.3",
         "@typescript/native": "npm:typescript@^7.0.2",
         "bits-ui": "^2.19.2",
@@ -323,6 +324,8 @@
 
     "@tailwindcss/vite": ["@tailwindcss/vite@4.3.3", "", { "dependencies": { "@tailwindcss/node": "4.3.3", "@tailwindcss/oxide": "4.3.3", "tailwindcss": "4.3.3" }, "peerDependencies": { "vite": "^5.2.0 || ^6 || ^7 || ^8" } }, "sha512-yYU8cogLeSh/ms2jh8Fj7jaba/EWa7Ja6GoUqYZaraEuCI5YS6ms6ObZgjjedm+jm6XZjdNRWBpPP6Z86oOxcw=="],
 
+    "@types/bun": ["@types/bun@1.4.2", "", { "dependencies": { "bun-types": "1.4.2" } }, "sha512-GimotNn7+ZV0uVArItBbriZsR1oNf0+WTzPkdcFrzShI7k2norL0uzEaJT8T33dWr7O/c9ZDuAFQrctKCi72oQ=="],
+
     "@types/cookie": ["@types/cookie@0.6.0", "", {}, "sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA=="],
 
     "@types/estree": ["@types/estree@1.0.9", "", {}, "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="],
@@ -388,6 +391,8 @@
     "bits-ui": ["bits-ui@2.19.2", "", { "dependencies": { "@floating-ui/core": "^1.7.1", "@floating-ui/dom": "^1.7.1", "esm-env": "^1.1.2", "runed": "^0.35.1", "svelte-toolbelt": "^0.10.6", "tabbable": "^6.2.0" }, "peerDependencies": { "@internationalized/date": "^3.8.1", "svelte": "^5.33.0" } }, "sha512-W9upilTmLTIWjuVAD6Ta7XoS6gxRflmCQnXamj+WN1eYxZecghqGENpuSMAKQmVENMLXhh85BZb04LCrBd2+Ng=="],
 
     "blake3-wasm": ["blake3-wasm@2.1.5", "", {}, "sha512-F1+K8EbfOZE49dtoPtmxUQrpXaBIl3ICvasLh+nJta0xkz+9kF/7uet9fLnwKqhDrmj6g+6K3Tw9yQPUg2ka5g=="],
+
+    "bun-types": ["bun-types@1.4.2", "", { "dependencies": { "@types/node": "*" } }, "sha512-bxV1FgK7yBIzjRe5zBozIM4Bem11ZJcCXSrjWRG3YWLt8yFDePu4cLjpebO8OvPeIE9trbyPF4fuj3Cia4Fj3w=="],
 
     "ccount": ["ccount@2.0.1", "", {}, "sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg=="],
 

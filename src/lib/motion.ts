@@ -24,9 +24,3 @@ export function rise(y = 10, delay = 0): FlyParams {
 		? { y: 0, duration: 140, delay: 0 }
 		: { y, duration: DURATION.panel, delay, easing: snappy };
 }
-
-/** Stagger step for a list. Collapses to zero under reduced motion. */
-export function stagger(index: number, step = 45, cap = 6): number {
-	if (prefersReducedMotion()) return 0;
-	return Math.min(index, cap) * step;
-}

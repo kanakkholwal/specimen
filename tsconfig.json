@@ -13,7 +13,6 @@
 	},
 	"exclude": [
 		".svelte-kit/output",
-		".svelte-kit/build",
 		"node_modules",
 		"dist",
 		"server"

@@ -1,10 +1,11 @@
 import { error } from '@sveltejs/kit';
 import { getCollection } from '$server/db';
 import type { PageServerLoad } from './$types';
+import { cache } from '$server/cache';
 
-export const load: PageServerLoad = async ({ params, platform, setHeaders }) => {
-	const data = await getCollection(platform, params.slug);
+export const load: PageServerLoad = async ({ params, setHeaders }) => {
+	const data = await getCollection(params.slug);
 	if (!data) error(404, 'No collection with that slug.');
-	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=3600' });
+	setHeaders({ 'cache-control': cache.listing });
 	return data;
 };

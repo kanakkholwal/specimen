@@ -1,6 +1,6 @@
 import { dev } from '$app/environment';
+import { getRequestEvent } from '$app/server';
 import { error } from '@sveltejs/kit';
-import { openLocalD1 } from '$server/local-db';
 
 export type StyleCard = {
 	id: string;
@@ -27,11 +27,14 @@ export type Facet = { value: string; count: number };
 
 // Production binds D1. Local dev has no binding, so it reads the SQLite bundle the
 // exporter writes, which holds identical content.
-async function db(platform: App.Platform | undefined): Promise<D1Database> {
+async function connection(): Promise<D1Database> {
+	const { platform } = getRequestEvent();
 	// Dev prefers the bundle over the injected D1 proxy, whose miniflare state is keyed by
 	// database name and empties whenever that name changes.
 	if (dev) {
 		try {
+			// Imported here so the worker bundle never contains the local SQLite reader.
+			const { openLocalD1 } = await import('$server/local-db');
 			return (await openLocalD1()) as D1Database;
 		} catch (e) {
 			// Never swallow this: hiding it makes a local problem look like a D1 problem.
@@ -65,8 +68,8 @@ function toCards(rows: CardRow[]): StyleCard[] {
 	}));
 }
 
-export async function getStats(platform: App.Platform | undefined): Promise<CorpusStats> {
-	const binding = await db(platform);
+export async function getStats(): Promise<CorpusStats> {
+	const binding = await connection();
 	const row = await binding
 		.prepare(
 			`SELECT (SELECT COUNT(*) FROM styles WHERE has_result = 1) AS styles,
@@ -80,11 +83,8 @@ export async function getStats(platform: App.Platform | undefined): Promise<Corp
 	return row;
 }
 
-export async function getRecentStyles(
-	platform: App.Platform | undefined,
-	limit = 12,
-): Promise<StyleCard[]> {
-	const binding = await db(platform);
+export async function getRecentStyles(limit = 12): Promise<StyleCard[]> {
+	const binding = await connection();
 	const { results } = await binding
 		.prepare(
 			`${CARD_SELECT} WHERE st.has_result = 1 AND st.site_name IS NOT NULL
@@ -103,11 +103,14 @@ export type SearchArgs = {
 	offset?: number;
 };
 
-export async function searchStyles(
-	platform: App.Platform | undefined,
-	{ q, theme, industry, limit = 24, offset = 0 }: SearchArgs,
-): Promise<{ results: StyleCard[]; total: number }> {
-	const binding = await db(platform);
+export async function searchStyles({
+	q,
+	theme,
+	industry,
+	limit = 24,
+	offset = 0,
+}: SearchArgs): Promise<{ results: StyleCard[]; total: number }> {
+	const binding = await connection();
 	const where: string[] = ['st.has_result = 1'];
 	const args: unknown[] = [];
 
@@ -139,10 +142,8 @@ export async function searchStyles(
 	};
 }
 
-export async function getFacets(
-	platform: App.Platform | undefined,
-): Promise<{ themes: Facet[]; industries: Facet[] }> {
-	const binding = await db(platform);
+export async function getFacets(): Promise<{ themes: Facet[]; industries: Facet[] }> {
+	const binding = await connection();
 	const [themes, industries] = await binding.batch<Facet>([
 		binding.prepare(
 			`SELECT theme AS value, COUNT(*) AS count FROM styles
@@ -217,8 +218,8 @@ export type TypographyRole = {
 	fontFeatures: string;
 };
 
-export async function getStyleDetail(platform: App.Platform | undefined, id: string) {
-	const binding = await db(platform);
+export async function getStyleDetail(id: string) {
+	const binding = await connection();
 	// One batch, so the detail page never becomes a chain of round trips.
 	const [
 		style,
@@ -314,8 +315,8 @@ export async function getStyleDetail(platform: App.Platform | undefined, id: str
 
 export type SiteRow = { origin: string; etld1: string; siteName: string | null; styles: number };
 
-export async function getSites(platform: App.Platform | undefined, limit = 200, offset = 0) {
-	const binding = await db(platform);
+export async function getSites(limit = 200, offset = 0) {
+	const binding = await connection();
 	const [list, count] = await binding.batch([
 		binding
 			.prepare(
@@ -332,8 +333,8 @@ export async function getSites(platform: App.Platform | undefined, limit = 200, 
 	};
 }
 
-export async function getStylesForOrigin(platform: App.Platform | undefined, origin: string) {
-	const binding = await db(platform);
+export async function getStylesForOrigin(origin: string) {
+	const binding = await connection();
 	const { results } = await binding
 		.prepare(
 			`${CARD_SELECT} WHERE st.has_result = 1 AND si.origin = ? ORDER BY st.extracted_at DESC`,
@@ -350,8 +351,8 @@ export type CollectionRow = {
 	styles: number;
 };
 
-export async function getCollections(platform: App.Platform | undefined) {
-	const binding = await db(platform);
+export async function getCollections() {
+	const binding = await connection();
 	const { results } = await binding
 		.prepare(
 			`SELECT c.slug, c.title, c.kind, COUNT(cs.style_id) AS styles
@@ -362,8 +363,8 @@ export async function getCollections(platform: App.Platform | undefined) {
 	return results ?? [];
 }
 
-export async function getCollection(platform: App.Platform | undefined, slug: string) {
-	const binding = await db(platform);
+export async function getCollection(slug: string) {
+	const binding = await connection();
 	const [meta, list] = await binding.batch([
 		binding.prepare(`SELECT slug, title, kind FROM collections WHERE slug = ?`).bind(slug),
 		binding
@@ -386,12 +387,8 @@ export async function getCollection(platform: App.Platform | undefined, slug: st
 
 // Bodies are stored in ordered chunks because the largest export is 145 KB, past D1's
 // statement ceiling. The reader joins them back.
-export async function getArtifactBody(
-	platform: App.Platform | undefined,
-	styleId: string,
-	name: string,
-): Promise<string | null> {
-	const binding = await db(platform);
+export async function getArtifactBody(styleId: string, name: string): Promise<string | null> {
+	const binding = await connection();
 	const { results } = await binding
 		.prepare(`SELECT chunk FROM artifact_content WHERE style_id = ? AND name = ? ORDER BY seq`)
 		.bind(styleId, name)
@@ -400,8 +397,8 @@ export async function getArtifactBody(
 	return results.map((r) => r.chunk).join('');
 }
 
-export async function getArtifactNames(platform: App.Platform | undefined, styleId: string) {
-	const binding = await db(platform);
+export async function getArtifactNames(styleId: string) {
+	const binding = await connection();
 	const { results } = await binding
 		.prepare(`SELECT name, bytes FROM artifacts WHERE style_id = ? ORDER BY name`)
 		.bind(styleId)

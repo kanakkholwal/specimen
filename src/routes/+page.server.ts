@@ -1,10 +1,11 @@
 import { getRecentStyles, getStats } from '$server/db';
 import type { PageServerLoad } from './$types';
+import { cache } from '$server/cache';
 
-export const load: PageServerLoad = async ({ platform, setHeaders }) => {
+export const load: PageServerLoad = async ({ setHeaders }) => {
 	// Both reads are independent, so they must not become a waterfall.
-	const [stats, recent] = await Promise.all([getStats(platform), getRecentStyles(platform, 8)]);
+	const [stats, recent] = await Promise.all([getStats(), getRecentStyles(8)]);
 
-	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=3600' });
+	setHeaders({ 'cache-control': cache.listing });
 	return { stats, recent };
 };

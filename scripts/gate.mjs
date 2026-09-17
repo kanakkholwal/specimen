@@ -1,8 +1,8 @@
 import { spawnSync } from 'node:child_process';
 import { existsSync, rmSync } from 'node:fs';
 
-// svelte-check mirrors src into this folder and never prunes it, so a deleted route keeps
-// failing the typecheck until it goes.
+// svelte-check --tsgo writes transpiled files here and never prunes them, so a renamed route
+// keeps failing the typecheck. No flag clears it.
 rmSync('.svelte-kit/.svelte-check', { recursive: true, force: true });
 
 // This is the single source of truth for CI. The workflow calls this same script, so a
@@ -15,7 +15,8 @@ const steps = [
 	// worker-configuration.d.ts is generated and untracked, so CI has to make it before typechecking.
 	{ name: 'worker types', cmd: 'bun', args: ['run', 'types'] },
 	{ name: 'types', cmd: 'bun', args: ['run', 'check'] },
-	{ name: 'build', cmd: 'bun', args: ['run', 'build'], env: { SVELTE_KIT_OUT_DIR: '.svelte-kit/build' } }
+	{ name: 'test', cmd: 'bun', args: ['test', 'src'] },
+	{ name: 'build', cmd: 'bun', args: ['run', 'build'] }
 ];
 
 if (existsSync('server/go.mod')) {
@@ -52,6 +53,10 @@ for (const step of selected) {
 	console.log(`FAILED (${(ms / 1000).toFixed(1)}s)`);
 	const output = `${run.stdout ?? ''}${run.stderr ?? ''}`.trim();
 	for (const line of output.split(/\r?\n/).slice(-25)) console.log(`      ${line}`);
+	// Dev miniflare keeps a handle on the assets directory named in wrangler.jsonc.
+	if (output.includes('EBUSY') && output.includes('cloudflare')) {
+		console.log('      hint: stop `bun run dev` and rerun, the dev worker holds this directory');
+	}
 	console.log('');
 }
 

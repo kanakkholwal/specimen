@@ -14,9 +14,8 @@ interface LocalStatement {
 	first<T>(): Promise<T | null>;
 }
 
-// Vite's SSR loader rewrites a normal dynamic import and then fails to resolve a runtime
-// builtin, so this builds one the transform cannot see.
-const nativeImport = new Function('s', 'return import(s)') as (s: string) => Promise<unknown>;
+// Vite would rewrite this import and then fail to resolve the runtime builtin.
+const nativeImport = (s: string): Promise<unknown> => import(/* @vite-ignore */ s);
 
 function statement(prepare: (sql: string) => Runner, sql: string): LocalStatement {
 	let bound: unknown[] = [];

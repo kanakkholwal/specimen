@@ -51,9 +51,13 @@ Individual checks:
 
 ```bash
 bun run check    # svelte-check on TypeScript 7
+bun test src     # unit tests
 bun run lint     # biome
 bun run build
 ```
+
+The build step writes where the dev worker keeps its assets, so stop `bun run dev` if the gate
+reports EBUSY.
 
 ## Layout
 

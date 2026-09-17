@@ -1,7 +1,8 @@
 import { getCollections } from '$server/db';
 import type { PageServerLoad } from './$types';
+import { cache } from '$server/cache';
 
-export const load: PageServerLoad = async ({ platform, setHeaders }) => {
-	setHeaders({ 'cache-control': 'public, max-age=0, s-maxage=3600' });
-	return { collections: await getCollections(platform) };
+export const load: PageServerLoad = async ({ setHeaders }) => {
+	setHeaders({ 'cache-control': cache.listing });
+	return { collections: await getCollections() };
 };
